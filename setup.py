@@ -1,9 +1,8 @@
 
-import mangler
 import os
 from setuptools import setup, find_packages
 
-from tiddlywebplugins.atom import __version__ as VERSION
+VERSION = '1.0.1'
 
 
 setup(

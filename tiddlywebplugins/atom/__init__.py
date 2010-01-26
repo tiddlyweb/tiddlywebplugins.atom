@@ -8,8 +8,6 @@ To use add 'tiddlywebplugins.atom' to system_plugins
 in tiddlywebconfig.py.
 """
 
-__version__ = '1.0'
-
 EXTENSION_TYPES = {
         'atom': 'application/atom+xml'
         }
