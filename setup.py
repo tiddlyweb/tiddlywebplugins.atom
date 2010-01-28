@@ -2,7 +2,7 @@
 import os
 from setuptools import setup, find_packages
 
-VERSION = '1.0.2'
+VERSION = '1.0.3'
 
 
 setup(
@@ -16,6 +16,6 @@ setup(
         packages = find_packages(exclude=['test']),
         author_email = 'cdent@peermore.com',
         platforms = 'Posix; MacOS X; Windows',
-        install_requires = ['setuptools', 'tiddlyweb'],
+        install_requires = ['setuptools', 'tiddlyweb>=1.0.0'],
         zip_safe = False
         )

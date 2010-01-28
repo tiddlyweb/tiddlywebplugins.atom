@@ -63,7 +63,6 @@ class Serialization(HTMLSerialization):
         link=u'%s%s' % (self._host_url(), current_url)
         if tiddlers:
             recipe = tiddlers[0].recipe
-            bag_name = tiddlers[0].bag
 
             if recipe:
                 feed = Atom1Feed(
@@ -74,10 +73,10 @@ class Serialization(HTMLSerialization):
                         )
             else:
                 feed = Atom1Feed(
-                        title=u'Tiddlers in Bag %s' % bag_name,
+                        title=u'Tiddlers in Bag %s' % bag.name,
                         link=link,
                         language=u'en',
-                        description=u'the tiddlers of bag %s' % bag_name
+                        description=u'the tiddlers of bag %s' % bag.name
                         )
         else:
             feed = Atom1Feed(
