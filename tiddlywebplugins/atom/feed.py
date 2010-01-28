@@ -126,7 +126,10 @@ class Serialization(HTMLSerialization):
             if tiddler.type and tiddler.type != 'None' and not tiddler.type.startswith('text/'):
                 description = 'Binary Content'
             else:
-                description = render_wikitext(tiddler, self.environ)
+                try:
+                    description = render_wikitext(tiddler, self.environ)
+                except KeyError:
+                    description = 'Tiddler cannot be rendered.'
 
             self._add_item(feed, tiddler, link, tiddler.title, description)
         else:
