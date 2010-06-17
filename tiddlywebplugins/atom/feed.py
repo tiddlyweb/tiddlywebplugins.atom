@@ -58,7 +58,10 @@ class Serialization(HTMLSerialization):
         """
         Turn the contents of a bag into an Atom Feed.
         """
-        tiddlers = bag.list_tiddlers()
+        try:
+            tiddlers = bag.list_tiddlers()
+        except AttributeError:
+            tiddlers = list(bag)
         current_url = self._current_url()
         link=u'%s%s' % (self._host_url(), current_url)
         if tiddlers:
