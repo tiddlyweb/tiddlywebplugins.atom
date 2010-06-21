@@ -60,8 +60,10 @@ class Serialization(HTMLSerialization):
         """
         try:
             tiddlers = bag.list_tiddlers()
+            bag_name = bag.name
         except AttributeError:
             tiddlers = list(bag)
+            bag_name = tiddlers[0].bag
         current_url = self._current_url()
         link=u'%s%s' % (self._host_url(), current_url)
         if tiddlers:
@@ -76,10 +78,10 @@ class Serialization(HTMLSerialization):
                         )
             else:
                 feed = Atom1Feed(
-                        title=u'Tiddlers in Bag %s' % bag.name,
+                        title=u'Tiddlers in Bag %s' % bag_name,
                         link=link,
                         language=u'en',
-                        description=u'the tiddlers of bag %s' % bag.name
+                        description=u'the tiddlers of bag %s' % bag_name
                         )
         else:
             feed = Atom1Feed(
