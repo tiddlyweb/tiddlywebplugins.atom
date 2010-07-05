@@ -26,6 +26,7 @@ import logging
 from xml.sax.saxutils import XMLGenerator
 
 
+from tiddlyweb.filters import parse_for_filters, recursive_filter
 from tiddlyweb.model.tiddler import Tiddler
 from tiddlyweb.serializations import SerializationInterface
 from tiddlyweb.serializations.html import Serialization as HTMLSerialization
@@ -64,6 +65,15 @@ class Serialization(HTMLSerialization):
         except AttributeError:
             tiddlers = list(bag)
             bag_name = tiddlers[0].bag
+
+        try:
+            config = self.environ['tiddlyweb.config']
+            default_filter = config['atom.default_filter']
+            filters, _ = parse_for_filters(default_filter, self.environ)
+            tiddlers = list(recursive_filter(filters, tiddlers))
+        except KeyError:
+            pass
+
         current_url = self._current_url()
         link=u'%s%s' % (self._host_url(), current_url)
         if tiddlers:

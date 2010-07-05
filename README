@@ -1,5 +1,5 @@
 
-The tiddlywebplugins.atom packages provide serialization modules to
+The tiddlywebplugins.atom package provides serialization modules to
 do a very simple Atom format syndication of collections of tiddlers
 (including one tiddler, and filtered tiddlers).
 
@@ -25,6 +25,17 @@ number of revisions shown is controlled by <some number>.
 
 You can get tiddlywebplugins.differ from PyPI:
 http://pypi.python.org/pypi/tiddlywebplugins.differ
+
+By default the feed given is all the tiddlers in the collection represented
+by the given URI, in no particular order. This is not always the best
+default. If you want a different default you can set 'atom.default_filter'
+in tiddlywebconfig.py to a string that represents a TiddlyWeb filter.
+For example:
+
+    'atom.default_filter': 'select=tag:!excludeLists;sort=-modified;limit=20',
+ 
+would give the 20 most recently modified tiddlers which are not tagged
+'excludeLists'.
 
 The Atom code is borrowed from Django's django/utils/feedgenerator.py
 
