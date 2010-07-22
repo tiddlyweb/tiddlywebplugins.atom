@@ -60,45 +60,38 @@ class Serialization(HTMLSerialization):
         Turn the contents of a bag into an Atom Feed.
         """
         try:
-            tiddlers = bag.list_tiddlers()
-            bag_name = bag.name
+            tiddlers = bag.gen_tiddlers()
         except AttributeError:
-            tiddlers = list(bag)
-            bag_name = tiddlers[0].bag
+            tiddlers = bag
 
         try:
+            from tiddlyweb.model.collections import Tiddlers
+            store = self.environ['tiddlyweb.store']
             config = self.environ['tiddlyweb.config']
             default_filter = config['atom.default_filter']
             filters, _ = parse_for_filters(default_filter, self.environ)
-            tiddlers = list(recursive_filter(filters, tiddlers))
-        except KeyError:
+            new_tiddlers = Tiddlers()
+            for tiddler in recursive_filter(filters, tiddlers):
+                new_tiddlers.add(tiddler)
+            tiddlers = new_tiddlers
+        except KeyError, ImportError:
             pass
 
         current_url = self._current_url()
         link=u'%s%s' % (self._host_url(), current_url)
-        if tiddlers:
-            recipe = tiddlers[0].recipe
+        feed = Atom1Feed(link=link,
+            language=u'en',
+            title='Empty Tiddler List',
+            description=u'Empty Tiddler List')
 
-            if recipe:
-                feed = Atom1Feed(
-                        title=u'Tiddlers in Recipe %s' % recipe,
-                        link=link,
-                        language=u'en',
-                        description=u'the tiddlers of recipe %s' % recipe
-                        )
-            else:
-                feed = Atom1Feed(
-                        title=u'Tiddlers in Bag %s' % bag_name,
-                        link=link,
-                        language=u'en',
-                        description=u'the tiddlers of bag %s' % bag_name
-                        )
-        else:
-            feed = Atom1Feed(
-                    title='Empty Tiddler List',
-                    link=link,
-                    description=u'Empty Tiddler List')
         for tiddler in tiddlers:
+            if tiddler.recipe:
+                feed.title = u'Tiddlers in Recipe %s' % tiddler.recipe
+                feed.description = u'the tiddlers of recipe %s' % tiddler.recipe
+            else:
+                feed.title = u'Tiddlers in Bag %s' % tiddler.bag
+                feed.description = u'the tiddlers of recipe %s' % tiddler.bag
+            
             self._add_tiddler_to_feed(feed, tiddler)
 
         # can we avoid sending utf-8 and let the wrapper handle it?
@@ -134,7 +127,8 @@ class Serialization(HTMLSerialization):
                     (self._server_url(), iri_to_uri(tiddler.bag),
                             iri_to_uri(urllib.quote(tiddler.title.encode('utf-8'), safe='')))
 
-        do_revisions = self.environ['tiddlyweb.query'].get('depth', [None])[0]
+        do_revisions = self.environ.get('tiddlyweb.query', {}).get(
+                'depth', [None])[0]
 
         if not do_revisions:
             if tiddler.type and tiddler.type != 'None' and not tiddler.type.startswith('text/'):
@@ -482,5 +476,3 @@ class Atom1Feed(SyndicationFeed):
                 handler.addQuickElement(u"rights", item['item_copyright'])
 
             handler.endElement(u"entry")
-
-
