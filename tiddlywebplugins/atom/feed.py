@@ -29,23 +29,13 @@ from xml.sax.saxutils import XMLGenerator
 from tiddlyweb.filters import parse_for_filters, recursive_filter
 from tiddlyweb.model.tiddler import Tiddler
 from tiddlyweb.serializations import SerializationInterface
-from tiddlyweb.serializations.html import Serialization as HTMLSerialization
 from tiddlyweb.wikitext import render_wikitext
 from tiddlyweb.web.util import server_base_url, server_host_url
 
-class Serialization(HTMLSerialization):
+class Serialization(SerializationInterface):
 
     def __init__(self, environ={}):
         self.environ = environ
-
-    def list_recipes(self, recipes):
-        pass
-
-    def list_bags(self, bags):
-        pass
-
-    def recipe_as(self, recipe):
-        pass
 
     def _current_url(self):
         script_name = self.environ.get('SCRIPT_NAME', '')
