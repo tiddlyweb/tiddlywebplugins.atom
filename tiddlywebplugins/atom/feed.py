@@ -45,14 +45,10 @@ class Serialization(SerializationInterface):
             url += '?%s' % query_string
         return url
 
-    def list_tiddlers(self, bag):
+    def list_tiddlers(self, tiddlers):
         """
-        Turn the contents of a bag into an Atom Feed.
+        Turn the contents of a Tiddlers into an Atom Feed.
         """
-        try:
-            tiddlers = bag.gen_tiddlers()
-        except AttributeError:
-            tiddlers = bag
 
         try:
             from tiddlyweb.model.collections import Tiddlers
@@ -63,6 +59,9 @@ class Serialization(SerializationInterface):
             new_tiddlers = Tiddlers()
             for tiddler in recursive_filter(filters, tiddlers):
                 new_tiddlers.add(tiddler)
+            new_tiddlers.title = tiddlers.title
+            new_tiddlers.is_search = tiddlers.is_search
+            new_tiddlers.is_revisions = tiddlers.is_revisions
             tiddlers = new_tiddlers
         except KeyError, ImportError:
             pass
@@ -71,17 +70,10 @@ class Serialization(SerializationInterface):
         link=u'%s%s' % (self._host_url(), current_url)
         feed = Atom1Feed(link=link,
             language=u'en',
-            title='Empty Tiddler List',
-            description=u'Empty Tiddler List')
+            title=tiddlers.title,
+            description=tiddlers.title)
 
         for tiddler in tiddlers:
-            if tiddler.recipe:
-                feed.title = u'Tiddlers in Recipe %s' % tiddler.recipe
-                feed.description = u'the tiddlers of recipe %s' % tiddler.recipe
-            else:
-                feed.title = u'Tiddlers in Bag %s' % tiddler.bag
-                feed.description = u'the tiddlers of recipe %s' % tiddler.bag
-            
             self._add_tiddler_to_feed(feed, tiddler)
 
         # can we avoid sending utf-8 and let the wrapper handle it?
