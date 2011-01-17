@@ -172,7 +172,11 @@ class Serialization(SerializationInterface):
         return '%s/%s/%s' % (tiddler.title, tiddler.bag, tiddler.revision)
 
     def _tiddler_datetime(self, date_string):
-        return datetime.datetime(*(time.strptime(date_string, '%Y%m%d%H%M%S')[0:6]))
+        try:
+            return datetime.datetime(*(time.strptime(
+                date_string, '%Y%m%d%H%M%S')[0:6]))
+        except ValueError: # bad format in timestring
+            return datetime.utcnow()
 
     def _host_url(self):
         return server_host_url(self.environ)
