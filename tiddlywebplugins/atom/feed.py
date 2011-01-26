@@ -176,7 +176,7 @@ class Serialization(SerializationInterface):
             return datetime.datetime(*(time.strptime(
                 date_string, '%Y%m%d%H%M%S')[0:6]))
         except ValueError: # bad format in timestring
-            return datetime.utcnow()
+            return datetime.datetime.utcnow()
 
     def _host_url(self):
         return server_host_url(self.environ)
