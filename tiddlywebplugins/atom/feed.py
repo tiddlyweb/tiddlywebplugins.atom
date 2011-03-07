@@ -29,8 +29,9 @@ from xml.sax.saxutils import XMLGenerator
 from tiddlyweb.filters import parse_for_filters, recursive_filter
 from tiddlyweb.model.tiddler import Tiddler
 from tiddlyweb.serializations import SerializationInterface
+from tiddlyweb.util import binary_tiddler
 from tiddlyweb.wikitext import render_wikitext
-from tiddlyweb.web.util import server_base_url, server_host_url
+from tiddlyweb.web.util import server_host_url, tiddler_url
 
 class Serialization(SerializationInterface):
 
@@ -80,17 +81,9 @@ class Serialization(SerializationInterface):
         return feed.writeString('utf-8')
 
     def tiddler_as(self, tiddler):
-        if tiddler.recipe:
-            link = u'%s/recipes/%s/tiddlers/%s' % \
-                    (self._server_url(), iri_to_uri(tiddler.recipe),
-                            iri_to_uri(urllib.quote(tiddler.title.encode('utf-8'), safe='')))
-        else:
-            link = u'%s/bags/%s/tiddlers/%s' % \
-                    (self._server_url(), iri_to_uri(tiddler.bag),
-                            iri_to_uri(urllib.quote(tiddler.title.encode('utf-8'), safe='')))
         feed = Atom1Feed(
                 title=u'%s' % tiddler.title,
-                link=link,
+                link=tiddler_url(self.environ, tiddler),
                 language=u'en',
                 description=u'tiddler %s' % tiddler.title
                 )
@@ -98,32 +91,29 @@ class Serialization(SerializationInterface):
         return feed.writeString('utf-8')
 
     def _add_tiddler_to_feed(self, feed, tiddler):
-        if tiddler.recipe:
-            tiddler_link = 'recipes/%s/tiddlers' % tiddler.recipe
-            link = u'%s/recipes/%s/tiddlers/%s' % \
-                    (self._server_url(), iri_to_uri(tiddler.recipe),
-                            iri_to_uri(urllib.quote(tiddler.title.encode('utf-8'), safe='')))
-        else:
-            tiddler_link = 'bags/%s/tiddlers' % tiddler.bag
-            link = u'%s/bags/%s/tiddlers/%s' % \
-                    (self._server_url(), iri_to_uri(tiddler.bag),
-                            iri_to_uri(urllib.quote(tiddler.title.encode('utf-8'), safe='')))
-
         do_revisions = self.environ.get('tiddlyweb.query', {}).get(
                 'depth', [None])[0]
 
         if not do_revisions:
-            if tiddler.type and tiddler.type != 'None' and not tiddler.type.startswith('text/'):
-                description = 'Binary Content'
+            if binary_tiddler(tiddler):
+                if tiddler.type.startswith('image/'):
+                    description = ('\n<html><img src="%s" /></html>\n'
+                            % tiddler_url(self.environ, tiddler))
+                else:
+                    description = ('\n<html><a href="%s">%s</a></html>\n'
+                            % (tiddler_url(self.environ, tiddler),
+                                tiddler.title))
             else:
                 try:
                     description = render_wikitext(tiddler, self.environ)
                 except KeyError:
                     description = 'Tiddler cannot be rendered.'
 
-            self._add_item(feed, tiddler, link, tiddler.title, description)
+            self._add_item(feed, tiddler, tiddler_url(self.environ, tiddler),
+                    tiddler.title, description)
         else:
-            self._process_tiddler_revisions(feed, tiddler, link, do_revisions)
+            self._process_tiddler_revisions(feed, tiddler,
+                    tiddler_url(self.environ, tiddler), do_revisions)
 
     def _process_tiddler_revisions(self, feed, tiddler, link, do_revisions):
         try:
@@ -148,8 +138,9 @@ class Serialization(SerializationInterface):
             rev_current = Tiddler(tiddler.title, tiddler.bag)
             rev_current.revision = revision_ids[depth]
             rev_current = store.get(rev_current)
-            if tiddler.type and tiddler.type != 'None' and not tiddler.type.startswith('text/'):
-                self._add_item(feed, tiddler, link, tiddler.title, 'Binary Content')
+            if binary_tiddler(tiddler):
+                self._add_item(feed, tiddler, link, tiddler.title,
+                        'Binary Content')
             else:
                 title = '%s comparing version %s to %s' % (tiddler.title,
                         rev_older.revision, rev_current.revision)
@@ -180,9 +171,6 @@ class Serialization(SerializationInterface):
 
     def _host_url(self):
         return server_host_url(self.environ)
-
-    def _server_url(self):
-        return server_base_url(self.environ)
 
 
 """
