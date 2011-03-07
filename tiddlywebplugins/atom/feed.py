@@ -1,5 +1,5 @@
 """
-Atom feeds for tiddlyweb.
+Atom feeds for tiddlyweb tiddlers.
 
 The Atom code is borrowed from Django's django/utils/feedgenerator.py
 

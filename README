@@ -42,6 +42,6 @@ The Atom code is borrowed from Django's django/utils/feedgenerator.py
 * http://www.djangoproject.com/documentation/syndication_feeds/
 * http://code.djangoproject.com/browser/django/trunk/django/utils/feedgenerator.py
 
-Copyright 2010, Chris Dent <cdent@peermore.com>.
+Copyright 2011, Chris Dent <cdent@peermore.com>.
 
-Licensed as TiddlyWeb itself.
+BSD Licensed as TiddlyWeb itself.
