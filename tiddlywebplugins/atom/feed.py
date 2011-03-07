@@ -3,8 +3,8 @@ Atom feeds for tiddlyweb.
 
 The Atom code is borrowed from Django's django/utils/feedgenerator.py
 
-  http://www.djangoproject.com/documentation/syndication_feeds/
-  http://code.djangoproject.com/browser/django/trunk/django/utils/feedgenerator.py
+http://www.djangoproject.com/documentation/syndication_feeds/
+http://code.djangoproject.com/browser/django/trunk/django/utils/feedgenerator.py
 
 Which appears to be licensed with
 
@@ -12,7 +12,6 @@ PYTHON SOFTWARE FOUNDATION LICENSE VERSION 2
 
 Thanks to those guys for making a feed library that hides the
 nasty XML details.
-
 """
 
 import time
@@ -32,6 +31,7 @@ from tiddlyweb.serializations import SerializationInterface
 from tiddlyweb.util import binary_tiddler
 from tiddlyweb.wikitext import render_wikitext
 from tiddlyweb.web.util import server_host_url, tiddler_url
+
 
 class Serialization(SerializationInterface):
 
@@ -68,7 +68,7 @@ class Serialization(SerializationInterface):
             pass
 
         current_url = self._current_url()
-        link=u'%s%s' % (self._host_url(), current_url)
+        link = u'%s%s' % (self._host_url(), current_url)
         feed = Atom1Feed(link=link,
             language=u'en',
             title=tiddlers.title,
@@ -85,8 +85,7 @@ class Serialization(SerializationInterface):
                 title=u'%s' % tiddler.title,
                 link=tiddler_url(self.environ, tiddler),
                 language=u'en',
-                description=u'tiddler %s' % tiddler.title
-                )
+                description=u'tiddler %s' % tiddler.title)
         self._add_tiddler_to_feed(feed, tiddler)
         return feed.writeString('utf-8')
 
@@ -145,7 +144,8 @@ class Serialization(SerializationInterface):
                 title = '%s comparing version %s to %s' % (tiddler.title,
                         rev_older.revision, rev_current.revision)
                 self._add_item(feed, rev_current, link, title,
-                        '<pre>' + compare_tiddlers(rev_older, rev_current) + '</pre>')
+                        '<pre>' + compare_tiddlers(rev_older, rev_current)
+                        + '</pre>')
             depth -= 1
 
     def _add_item(self, feed, tiddler, link, title, description):
@@ -156,8 +156,7 @@ class Serialization(SerializationInterface):
                 categories=tiddler.tags,
                 description=description,
                 author_name=tiddler.modifier,
-                pubdate=self._tiddler_datetime(tiddler.modified)
-                )
+                pubdate=self._tiddler_datetime(tiddler.modified))
 
     def _tiddler_id(self, tiddler):
         return '%s/%s/%s' % (tiddler.title, tiddler.bag, tiddler.revision)
@@ -166,7 +165,7 @@ class Serialization(SerializationInterface):
         try:
             return datetime.datetime(*(time.strptime(
                 date_string, '%Y%m%d%H%M%S')[0:6]))
-        except ValueError: # bad format in timestring
+        except ValueError:  # bad format in timestring
             return datetime.datetime.utcnow()
 
     def _host_url(self):
@@ -176,14 +175,18 @@ class Serialization(SerializationInterface):
 """
 Atom feed generation from django.
 """
+
+
 class SimplerXMLGenerator(XMLGenerator):
     def addQuickElement(self, name, contents=None, attrs=None):
         "Convenience method for adding an element with no children"
-        if attrs is None: attrs = {}
+        if attrs is None:
+            attrs = {}
         self.startElement(name, attrs)
         if contents is not None:
             self.characters(contents)
         self.endElement(name)
+
 
 def force_unicode(s, encoding='utf-8', strings_only=False, errors='strict'):
     """
@@ -192,7 +195,8 @@ def force_unicode(s, encoding='utf-8', strings_only=False, errors='strict'):
 
     If strings_only is True, don't convert (some) non-string-like objects.
     """
-    if strings_only and isinstance(s, (types.NoneType, int, long, datetime.datetime, datetime.date, datetime.time, float)):
+    if strings_only and isinstance(s, (types.NoneType, int, long,
+        datetime.datetime, datetime.date, datetime.time, float)):
         return s
     if not isinstance(s, basestring,):
         if hasattr(s, '__unicode__'):
@@ -205,6 +209,7 @@ def force_unicode(s, encoding='utf-8', strings_only=False, errors='strict'):
         # SafeUnicode at the end.
         s = s.decode(encoding, errors)
     return s
+
 
 def smart_str(s, encoding='utf-8', strings_only=False, errors='strict'):
     """
@@ -225,6 +230,7 @@ def smart_str(s, encoding='utf-8', strings_only=False, errors='strict'):
         return s.decode('utf-8', errors).encode(encoding, errors)
     else:
         return s
+
 
 def iri_to_uri(iri):
     """
@@ -247,24 +253,12 @@ def iri_to_uri(iri):
 
 """
 Syndication feed generation library -- used for generating RSS, etc.
-
-Sample usage:
-
->>> from django.utils import feedgenerator
->>> feed = feedgenerator.Rss201rev2Feed(
-...     title=u"Poynter E-Media Tidbits",
-...     link=u"http://www.poynter.org/column.asp?id=31",
-...     description=u"A group weblog by the sharpest minds in online media/journalism/publishing.",
-...     language=u"en",
-... )
->>> feed.add_item(title="Hello", link=u"http://www.holovaty.com/test/", description="Testing.")
->>> fp = open('test.rss', 'w')
->>> feed.write(fp, 'utf-8')
->>> fp.close()
 """
+
 
 def rfc2822_date(date):
     return email.Utils.formatdate(time.mktime(date.timetuple()))
+
 
 def rfc3339_date(date):
     if date.tzinfo:
@@ -272,19 +266,26 @@ def rfc3339_date(date):
     else:
         return date.strftime('%Y-%m-%dT%H:%M:%SZ')
 
+
 def get_tag_uri(url, date):
-    "Creates a TagURI. See http://diveintomark.org/archives/2004/05/28/howto-atom-id"
+    """
+    Creates a TagURI.
+    See http://diveintomark.org/archives/2004/05/28/howto-atom-id
+    """
     tag = re.sub('^http://', '', url)
     if date is not None:
         tag = re.sub('/', ',%s:/' % date.strftime('%Y-%m-%d'), tag, 1)
     tag = re.sub('#', '/', tag)
     return u'tag:' + tag
 
+
 class SyndicationFeed(object):
     "Base class for all syndication feeds. Subclasses should provide write()"
-    def __init__(self, title, link, description, language=None, author_email=None,
-            author_name=None, author_link=None, subtitle=None, categories=None,
-            feed_url=None, feed_copyright=None, feed_guid=None, ttl=None):
+
+    def __init__(self, title, link, description, language=None,
+            author_email=None, author_name=None, author_link=None,
+            subtitle=None, categories=None, feed_url=None,
+            feed_copyright=None, feed_guid=None, ttl=None):
         to_unicode = lambda s: force_unicode(s, strings_only=True)
         if categories:
             categories = [force_unicode(c) for c in categories]
@@ -307,7 +308,8 @@ class SyndicationFeed(object):
 
     def add_item(self, title, link, description, author_email=None,
         author_name=None, author_link=None, pubdate=None, comments=None,
-        unique_id=None, enclosure=None, categories=(), item_copyright=None, ttl=None):
+        unique_id=None, enclosure=None, categories=(),
+        item_copyright=None, ttl=None):
         """
         Adds an item to the feed. All args are expected to be Python Unicode
         objects except pubdate, which is a datetime.datetime object, and
@@ -356,12 +358,14 @@ class SyndicationFeed(object):
         Returns the latest item's pubdate. If none of them have a pubdate,
         this returns the current date/time.
         """
-        updates = [i['pubdate'] for i in self.items if i['pubdate'] is not None]
+        updates = [i['pubdate'] for i in self.items
+                if i['pubdate'] is not None]
         if len(updates) > 0:
             updates.sort()
             return updates[-1]
         else:
             return datetime.datetime.now()
+
 
 class Enclosure(object):
     "Represents an RSS enclosure"
@@ -370,23 +374,29 @@ class Enclosure(object):
         self.length, self.mime_type = length, mime_type
         self.url = iri_to_uri(url)
 
+
 class Atom1Feed(SyndicationFeed):
     # Spec: http://atompub.org/2005/07/11/draft-ietf-atompub-format-10.html
     mime_type = 'application/atom+xml'
     ns = u"http://www.w3.org/2005/Atom"
+
     def write(self, outfile, encoding):
         handler = SimplerXMLGenerator(outfile, encoding)
         handler.startDocument()
         if self.feed['language'] is not None:
-            handler.startElement(u"feed", {u"xmlns": self.ns, u"xml:lang": self.feed['language']})
+            handler.startElement(u"feed",
+                    {u"xmlns": self.ns, u"xml:lang": self.feed['language']})
         else:
             handler.startElement(u"feed", {u"xmlns": self.ns})
         handler.addQuickElement(u"title", self.feed['title'])
-        handler.addQuickElement(u"link", "", {u"rel": u"alternate", u"href": self.feed['link']})
+        handler.addQuickElement(u"link", "",
+                {u"rel": u"alternate", u"href": self.feed['link']})
         if self.feed['feed_url'] is not None:
-            handler.addQuickElement(u"link", "", {u"rel": u"self", u"href": self.feed['feed_url']})
+            handler.addQuickElement(u"link", "",
+                    {u"rel": u"self", u"href": self.feed['feed_url']})
         handler.addQuickElement(u"id", self.feed['id'])
-        handler.addQuickElement(u"updated", rfc3339_date(self.latest_post_date()).decode('ascii'))
+        handler.addQuickElement(u"updated",
+                rfc3339_date(self.latest_post_date()).decode('ascii'))
         if self.feed['author_name'] is not None:
             handler.startElement(u"author", {})
             handler.addQuickElement(u"name", self.feed['author_name'])
@@ -408,9 +418,11 @@ class Atom1Feed(SyndicationFeed):
         for item in self.items:
             handler.startElement(u"entry", {})
             handler.addQuickElement(u"title", item['title'])
-            handler.addQuickElement(u"link", u"", {u"href": item['link'], u"rel": u"alternate"})
+            handler.addQuickElement(u"link", u"",
+                    {u"href": item['link'], u"rel": u"alternate"})
             if item['pubdate'] is not None:
-                handler.addQuickElement(u"updated", rfc3339_date(item['pubdate']).decode('ascii'))
+                handler.addQuickElement(u"updated",
+                        rfc3339_date(item['pubdate']).decode('ascii'))
 
             # Author information.
             if item['author_name'] is not None:
@@ -431,7 +443,8 @@ class Atom1Feed(SyndicationFeed):
 
             # Summary.
             if item['description'] is not None:
-                handler.addQuickElement(u"summary", item['description'], {u"type": u"html"})
+                handler.addQuickElement(u"summary", item['description'],
+                        {u"type": u"html"})
 
             # Enclosure.
             if item['enclosure'] is not None:

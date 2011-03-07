@@ -20,6 +20,7 @@ SERIALIZERS = {
             'text/html; charset=UTF-8']
         }
 
+
 def init(config):
     config['extension_types'].update(EXTENSION_TYPES)
     config['serializers'].update(SERIALIZERS)
