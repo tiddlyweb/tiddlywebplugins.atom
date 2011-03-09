@@ -16,6 +16,8 @@ setup(
         packages = find_packages(exclude=['test']),
         author_email = 'cdent@peermore.com',
         platforms = 'Posix; MacOS X; Windows',
-        install_requires = ['setuptools', 'tiddlyweb>=1.2.10'],
+        install_requires = ['setuptools',
+            'tiddlyweb>=1.2.10',
+            'feedgenerator'],
         zip_safe = False
         )
