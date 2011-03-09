@@ -28,7 +28,7 @@ from xml.sax.saxutils import XMLGenerator
 from tiddlyweb.filters import parse_for_filters, recursive_filter
 from tiddlyweb.model.tiddler import Tiddler
 from tiddlyweb.serializations import SerializationInterface
-from tiddlyweb.util import binary_tiddler
+from tiddlyweb.util import binary_tiddler, pseudo_binary
 from tiddlyweb.wikitext import render_wikitext
 from tiddlyweb.web.util import server_host_url, tiddler_url
 
@@ -102,6 +102,8 @@ class Serialization(SerializationInterface):
                     description = ('\n<html><a href="%s">%s</a></html>\n'
                             % (tiddler_url(self.environ, tiddler),
                                 tiddler.title))
+            elif pseudo_binary(tiddler.type):
+                description = '<pre>' + tiddler.text + '</pre>'
             else:
                 try:
                     description = render_wikitext(tiddler, self.environ)
