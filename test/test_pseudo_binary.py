@@ -40,3 +40,11 @@ def test_svg_output():
     serializer.object = tiddler
     output = serializer.to_string()
     assert 'wikkly-error-head' not in output
+
+def test_normal_output():
+    tiddler = Tiddler('not svg thing', 'fake')
+    tiddler.text = '!Hi'
+
+    serializer.object = tiddler
+    output = serializer.to_string()
+    assert 'h1 class="w' in output

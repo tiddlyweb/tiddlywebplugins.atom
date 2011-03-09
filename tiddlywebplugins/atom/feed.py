@@ -85,7 +85,7 @@ class Serialization(SerializationInterface):
                     description = ('\n<html><a href="%s">%s</a></html>\n'
                             % (tiddler_url(self.environ, tiddler),
                                 tiddler.title))
-            elif pseudo_binary(tiddler.type):
+            elif tiddler.type and pseudo_binary(tiddler.type):
                 description = '<pre>' + tiddler.text + '</pre>'
             else:
                 try:
