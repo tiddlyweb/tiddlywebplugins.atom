@@ -6,7 +6,7 @@ import time
 import datetime
 import logging
 
-from feedgenerator import Atom1Feed
+from feedgenerator import Atom1Feed, rfc3339_date
 
 from tiddlyweb.filters import parse_for_filters, recursive_filter
 from tiddlyweb.model.tiddler import Tiddler
@@ -17,9 +17,6 @@ from tiddlyweb.web.util import server_host_url, tiddler_url
 
 
 class Serialization(SerializationInterface):
-
-    def __init__(self, environ={}):
-        self.environ = environ
 
     def _current_url(self):
         script_name = self.environ.get('SCRIPT_NAME', '')
@@ -47,12 +44,12 @@ class Serialization(SerializationInterface):
             new_tiddlers.is_search = tiddlers.is_search
             new_tiddlers.is_revisions = tiddlers.is_revisions
             tiddlers = new_tiddlers
-        except KeyError, ImportError:
+        except (KeyError, ImportError):
             pass
 
         current_url = self._current_url()
         link = u'%s%s' % (self._host_url(), current_url)
-        feed = Atom1Feed(link=link,
+        feed = AtomFeed(link=link,
             language=u'en',
             title=tiddlers.title,
             description=tiddlers.title)
@@ -64,7 +61,7 @@ class Serialization(SerializationInterface):
         return feed.writeString('utf-8')
 
     def tiddler_as(self, tiddler):
-        feed = Atom1Feed(
+        feed = AtomFeed(
                 title=u'%s' % tiddler.title,
                 link=tiddler_url(self.environ, tiddler),
                 language=u'en',
@@ -79,10 +76,10 @@ class Serialization(SerializationInterface):
         if not do_revisions:
             if binary_tiddler(tiddler):
                 if tiddler.type.startswith('image/'):
-                    description = ('\n<html><img src="%s" /></html>\n'
+                    description = ('\n<img src="%s" />\n'
                             % tiddler_url(self.environ, tiddler))
                 else:
-                    description = ('\n<html><a href="%s">%s</a></html>\n'
+                    description = ('\n<a href="%s">%s</a>\n'
                             % (tiddler_url(self.environ, tiddler),
                                 tiddler.title))
             elif tiddler.type and pseudo_binary(tiddler.type):
@@ -134,14 +131,15 @@ class Serialization(SerializationInterface):
             depth -= 1
 
     def _add_item(self, feed, tiddler, link, title, description):
-        logging.debug('adding %s' % title)
+        logging.debug('adding %s', title)
         feed.add_item(title=title,
                 unique_id=self._tiddler_id(tiddler),
                 link=link,
                 categories=tiddler.tags,
                 description=description,
                 author_name=tiddler.modifier,
-                pubdate=self._tiddler_datetime(tiddler.modified))
+                pubdate=self._tiddler_datetime(tiddler.created),
+                updated=self._tiddler_datetime(tiddler.modified))
 
     def _tiddler_id(self, tiddler):
         return '%s/%s/%s' % (tiddler.title, tiddler.bag, tiddler.revision)
@@ -155,3 +153,90 @@ class Serialization(SerializationInterface):
 
     def _host_url(self):
         return server_host_url(self.environ)
+
+
+class AtomFeed(Atom1Feed):
+    """
+    Override the default Atom1Feed to improve the output.
+    Use content instead of summary in each entry for the "description".
+    Later we'll add hub and top level author information.
+    """
+
+    def add_item(self, title, link, description,
+            author_email=None, author_name=None, author_link=None,
+            pubdate=None, updated=None, unique_id=None,
+            enclosure=None, categories=(), item_copyright=None,
+            **kwargs):
+        """
+        Adds an item to the feed. All args are expected to be Python Unicode
+        objects except pubdate, which is a datetime.datetime object, and
+        enclosure, which is an instance of the Enclosure class.
+        """
+        item = {
+            'title': title,
+            'link': link,
+            'description': description,
+            'author_email': author_email,
+            'author_name': author_name,
+            'author_link': author_link,
+            'pubdate': pubdate,
+            'updated': updated,
+            'unique_id': unique_id,
+            'enclosure': enclosure,
+            'categories': categories or (),
+            'item_copyright': item_copyright,
+        }
+        item.update(kwargs)
+        self.items.append(item)
+
+    def add_item_elements(self, handler, item):
+        """
+        We override this entire method to handle
+        pubdate -> published
+        updated -> updated
+        description -> content (instead of summary)
+        """
+        handler.addQuickElement(u"title", item['title'])
+        handler.addQuickElement(u"link", u"",
+                {u"href": item['link'], u"rel": u"alternate"})
+        if item['updated'] is not None:
+            handler.addQuickElement(u"updated",
+                    rfc3339_date(item['updated']).decode('utf-8'))
+        if item['pubdate'] is not None:
+            handler.addQuickElement(u"published",
+                    rfc3339_date(item['pubdate']).decode('utf-8'))
+
+        # Author information.
+        if item['author_name'] is not None:
+            handler.startElement(u"author", {})
+            handler.addQuickElement(u"name", item['author_name'])
+            if item['author_email'] is not None:
+                handler.addQuickElement(u"email", item['author_email'])
+            if item['author_link'] is not None:
+                handler.addQuickElement(u"uri", item['author_link'])
+            handler.endElement(u"author")
+
+        # Unique ID.
+        handler.addQuickElement(u"id", item['unique_id'])
+
+        # Content.
+        item_type = item.get('type', u'html')
+        if item['description'] is not None:
+            handler.addQuickElement(u"content", item['description'],
+                    {u"type": item_type})
+
+        # Enclosure.
+        if item['enclosure'] is not None:
+            handler.addQuickElement(u"link", '',
+                {u"rel": u"enclosure",
+                 u"href": item['enclosure'].url,
+                 u"length": item['enclosure'].length,
+                 u"type": item['enclosure'].mime_type})
+
+        # Categories.
+        for cat in item['categories']:
+            handler.addQuickElement(u"category", u"", {u"term": cat})
+
+        # Rights.
+        if item['item_copyright'] is not None:
+            handler.addQuickElement(u"rights", item['item_copyright'])
