@@ -82,7 +82,10 @@ class Serialization(SerializationInterface):
                     description = ('\n<a href="%s">%s</a>\n'
                             % (tiddler_url(self.environ, tiddler),
                                 tiddler.title))
-            elif tiddler.type and pseudo_binary(tiddler.type):
+            elif (tiddler.type and (
+                tiddler.type not in
+                self.environ['tiddlyweb.config']['wikitext.type_render_map'])
+                and pseudo_binary(tiddler.type)):
                 description = '<pre>' + tiddler.text + '</pre>'
             else:
                 try:
