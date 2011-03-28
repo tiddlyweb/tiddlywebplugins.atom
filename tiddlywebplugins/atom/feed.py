@@ -1,5 +1,29 @@
 """
 Atom feeds for tiddlyweb tiddlers.
+
+By default the feed given is all the tiddlers in the collection represented
+by the given URI, in no particular order. This is not always the best
+default. If you want a different default you can set 'atom.default_filter'
+in tiddlywebconfig.py to a string that represents a TiddlyWeb filter.
+For example:
+
+    'atom.default_filter': 'select=tag:!excludeLists;sort=-modified;limit=20',
+         
+would give the 20 most recently modified tiddlers which are not tagged
+'excludeLists'.
+
+The atom feed will include author elements for each tiddler. If all
+the tiddlers have the same modifier, then there will also be a feed
+level author element. 
+
+If 'atom.author_uri_map' is set in config then its value will be used
+as the format string for created a uri element within the author element.
+For example:
+
+    'atom.author_uri_map': '/profiles/%s'
+
+will result in a uri element value for the user cdent on server_host
+0.0.0.0:8080 (with no server_prefix) of "http://0.0.0.0/profiles/cdent".
 """
 
 import time
@@ -13,7 +37,7 @@ from tiddlyweb.model.tiddler import Tiddler
 from tiddlyweb.serializations import SerializationInterface
 from tiddlyweb.util import binary_tiddler, pseudo_binary
 from tiddlyweb.wikitext import render_wikitext
-from tiddlyweb.web.util import server_host_url, tiddler_url
+from tiddlyweb.web.util import server_base_url, server_host_url, tiddler_url
 
 
 class Serialization(SerializationInterface):
@@ -31,15 +55,16 @@ class Serialization(SerializationInterface):
         Turn the contents of a Tiddlers into an Atom Feed.
         """
 
+        authors = set()
         try:
             from tiddlyweb.model.collections import Tiddlers
-            store = self.environ['tiddlyweb.store']
             config = self.environ['tiddlyweb.config']
             default_filter = config['atom.default_filter']
             filters, _ = parse_for_filters(default_filter, self.environ)
             new_tiddlers = Tiddlers()
             for tiddler in recursive_filter(filters, tiddlers):
                 new_tiddlers.add(tiddler)
+                authors.add(tiddler.modifier)
             new_tiddlers.title = tiddlers.title
             new_tiddlers.is_search = tiddlers.is_search
             new_tiddlers.is_revisions = tiddlers.is_revisions
@@ -47,10 +72,18 @@ class Serialization(SerializationInterface):
         except (KeyError, ImportError):
             pass
 
+        author_name = None
+        author_link = None
+        if len(authors) == 1:
+            author_name = authors.pop()
+            author_link = self._get_author_link(author_name)
+
         current_url = self._current_url()
         link = u'%s%s' % (self._host_url(), current_url)
         feed = AtomFeed(link=link,
             language=u'en',
+            author_name=author_name,
+            author_link=author_link,
             title=tiddlers.title,
             description=tiddlers.title)
 
@@ -99,6 +132,16 @@ class Serialization(SerializationInterface):
             self._process_tiddler_revisions(feed, tiddler,
                     tiddler_url(self.environ, tiddler), do_revisions)
 
+    def _get_author_link(self, author_name):
+        author_link = None
+        author_uri_map = self.environ.get(
+                'tiddlyweb.config', {}).get(
+                        'atom.author_uri_map', None)
+        if author_uri_map:
+            author_link = (server_base_url(self.environ) +
+                    author_uri_map % author_name)
+        return author_link
+
     def _process_tiddler_revisions(self, feed, tiddler, link, do_revisions):
         try:
             from tiddlywebplugins.differ import compare_tiddlers
@@ -135,12 +178,14 @@ class Serialization(SerializationInterface):
 
     def _add_item(self, feed, tiddler, link, title, description):
         logging.debug('adding %s', title)
+        author_link = self._get_author_link(tiddler.modifier)
         feed.add_item(title=title,
                 unique_id=self._tiddler_id(tiddler),
                 link=link,
                 categories=tiddler.tags,
                 description=description,
                 author_name=tiddler.modifier,
+                author_link=author_link,
                 pubdate=self._tiddler_datetime(tiddler.created),
                 updated=self._tiddler_datetime(tiddler.modified))
 
