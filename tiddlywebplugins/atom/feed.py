@@ -74,9 +74,11 @@ class Serialization(SerializationInterface):
 
         author_name = None
         author_link = None
+        author_avatar = None
         if len(authors) == 1:
             author_name = authors.pop()
             author_link = self._get_author_link(author_name)
+            author_avatar = self._get_author_avatar(author_name)
 
         hub = self.environ.get('tiddlyweb.config', {}).get('atom.hub',
                 None)
@@ -88,6 +90,7 @@ class Serialization(SerializationInterface):
             hub=hub,
             author_name=author_name,
             author_link=author_link,
+            author_avatar=author_avatar,
             title=tiddlers.title,
             description=tiddlers.title)
 
@@ -145,6 +148,16 @@ class Serialization(SerializationInterface):
             author_link = (server_base_url(self.environ) +
                     author_uri_map % author_name)
         return author_link
+
+    def _get_author_avatar(self, author_name):
+        author_avatar = None
+        author_avatar_map = self.environ.get(
+                'tiddlyweb.config', {}).get(
+                        'atom.author_avatar_map', None)
+        if author_avatar_map:
+            author_avatar = (server_base_url(self.environ) +
+                    author_avatar_map % author_name)
+        return author_avatar
 
     def _process_tiddler_revisions(self, feed, tiddler, link, do_revisions):
         try:
@@ -246,6 +259,9 @@ class AtomFeed(Atom1Feed):
         if 'hub' in self.feed and self.feed['hub']:
             handler.addQuickElement(u'link', u'',
                     {u'href': self.feed['hub'], u'rel': u'hub'})
+        if 'author_avatar' in self.feed and self.feed['author_avatar']:
+            handler.addQuickElement(u'link', u'',
+                    {u'href': self.feed['author_avatar'], u'rel': u'avatar'})
 
     def add_item_elements(self, handler, item):
         """

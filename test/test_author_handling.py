@@ -13,6 +13,7 @@ def setup_module(module):
     module.serializer = Serializer('tiddlywebplugins.atom.feed',
             environ={'tiddlyweb.config': config})
     config['atom.author_uri_map'] = '/profiles/%s'
+    config['atom.author_avatar_map'] = '/bags/%s_public/tiddlers/SiteIcon'
     config['atom.hub'] = 'http://pubsubhubbub.appspot.com/'
 
 def test_collection():
@@ -31,3 +32,4 @@ def test_collection():
     assert '<name>cdent</name>' in output
     assert '<uri>http://0.0.0.0:8080/profiles/cdent</uri>' in output
     assert '<link href="http://pubsubhubbub.appspot.com/" rel="hub">' in output
+    assert 'rel="avatar"' in output, output
