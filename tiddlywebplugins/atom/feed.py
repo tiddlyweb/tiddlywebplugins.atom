@@ -78,10 +78,14 @@ class Serialization(SerializationInterface):
             author_name = authors.pop()
             author_link = self._get_author_link(author_name)
 
+        hub = self.environ.get('tiddlyweb.config', {}).get('atom.hub',
+                None)
+
         current_url = self._current_url()
         link = u'%s%s' % (self._host_url(), current_url)
         feed = AtomFeed(link=link,
             language=u'en',
+            hub=hub,
             author_name=author_name,
             author_link=author_link,
             title=tiddlers.title,
@@ -236,6 +240,12 @@ class AtomFeed(Atom1Feed):
         }
         item.update(kwargs)
         self.items.append(item)
+
+    def add_root_elements(self, handler):
+        Atom1Feed.add_root_elements(self, handler)
+        if 'hub' in self.feed and self.feed['hub']:
+            handler.addQuickElement(u'link', u'',
+                    {u'href': self.feed['hub'], u'rel': u'hub'})
 
     def add_item_elements(self, handler, item):
         """
