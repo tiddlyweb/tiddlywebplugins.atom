@@ -207,7 +207,7 @@ class Serialization(SerializationInterface):
                 updated=self._tiddler_datetime(tiddler.modified))
 
     def _tiddler_id(self, tiddler):
-        return '%s/%s/%s' % (tiddler.title, tiddler.bag, tiddler.revision)
+        return '%s/%s' % (tiddler.bag, tiddler.title)
 
     def _tiddler_datetime(self, date_string):
         try:
