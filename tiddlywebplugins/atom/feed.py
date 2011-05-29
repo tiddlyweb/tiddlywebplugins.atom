@@ -48,7 +48,7 @@ class Serialization(SerializationInterface):
         url = script_name
         if query_string:
             url += '?%s' % query_string
-        return url
+        return url.decode('utf-8', 'replace')
 
     def list_tiddlers(self, tiddlers):
         """
