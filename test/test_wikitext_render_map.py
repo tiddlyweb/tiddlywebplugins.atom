@@ -1,6 +1,5 @@
 """
-Test that psuedo-binaries like image/svg+xml get treated
-fairly and not wikified.
+Test that the wikitext render map is seen and used.
 """
 
 from tiddlyweb.serializer import Serializer
