@@ -196,15 +196,24 @@ class Serialization(SerializationInterface):
     def _add_item(self, feed, tiddler, link, title, description):
         logging.debug('adding %s', title)
         author_link = self._get_author_link(tiddler.modifier)
+        entry_base = self._get_entry_base(tiddler)
         feed.add_item(title=title,
                 unique_id=self._tiddler_id(tiddler),
                 link=link,
+                base=entry_base,
                 categories=tiddler.tags,
                 description=description,
                 author_name=tiddler.modifier,
                 author_link=author_link,
                 pubdate=self._tiddler_datetime(tiddler.created),
                 updated=self._tiddler_datetime(tiddler.modified))
+
+    def _get_entry_base(self, tiddler):
+        if tiddler.recipe:
+            url = tiddler_url(self.environ, tiddler, container='recipes')
+        else:
+            url = tiddler_url(self.environ, tiddler)
+        return url.rsplit('/', 1)[0] + '/'
 
     def _tiddler_id(self, tiddler):
         return '%s/%s' % (tiddler.bag, tiddler.title)
@@ -227,7 +236,7 @@ class AtomFeed(Atom1Feed):
     Later we'll add hub and top level author information.
     """
 
-    def add_item(self, title, link, description,
+    def add_item(self, title, link, description, base=None,
             author_email=None, author_name=None, author_link=None,
             pubdate=None, updated=None, unique_id=None,
             enclosure=None, categories=(), item_copyright=None,
@@ -240,6 +249,7 @@ class AtomFeed(Atom1Feed):
         item = {
             'title': title,
             'link': link,
+            'base': base,
             'description': description,
             'author_email': author_email,
             'author_name': author_name,
@@ -295,9 +305,13 @@ class AtomFeed(Atom1Feed):
 
         # Content.
         item_type = item.get('type', u'html')
+        content_dict = {u"type": item_type}
+        if item['base']:
+            content_dict[u"xml:base"] = item['base']
+
         if item['description'] is not None:
             handler.addQuickElement(u"content", item['description'],
-                    {u"type": item_type})
+                    content_dict)
 
         # Enclosure.
         if item['enclosure'] is not None:
