@@ -16,8 +16,6 @@ SERIALIZERS = {
             'application/atom+xml; charset=UTF-8'],
         'text/html': ['tiddlywebplugins.atom.htmllinks',
             'text/html; charset=UTF-8'],
-        'default': ['tiddlywebplugins.atom.htmllinks',
-            'text/html; charset=UTF-8']
         }
 
 
