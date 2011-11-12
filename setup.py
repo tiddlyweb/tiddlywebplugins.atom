@@ -2,7 +2,7 @@
 import os
 from setuptools import setup, find_packages
 
-VERSION = '1.3.11'
+VERSION = '1.3.12'
 
 
 setup(
