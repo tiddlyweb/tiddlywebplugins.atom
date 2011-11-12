@@ -20,5 +20,8 @@ SERIALIZERS = {
 
 
 def init(config):
+    """
+    Update serialization info to include atom.
+    """
     config['extension_types'].update(EXTENSION_TYPES)
     config['serializers'].update(SERIALIZERS)

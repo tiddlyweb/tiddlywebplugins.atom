@@ -8,6 +8,10 @@ from tiddlyweb.web.util import tiddler_url
 
 
 class Serialization(HTMLSerialization):
+    """
+    Override the HTMLSerialization to add <link> elements pointing
+    to the available Atom feeds.
+    """
 
     def _tiddler_list_header(self, wiki_link):
         if wiki_link:

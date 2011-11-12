@@ -8,13 +8,13 @@ in tiddlywebconfig.py to a string that represents a TiddlyWeb filter.
 For example:
 
     'atom.default_filter': 'select=tag:!excludeLists;sort=-modified;limit=20',
-         
+
 would give the 20 most recently modified tiddlers which are not tagged
 'excludeLists'.
 
 The atom feed will include author elements for each tiddler. If all
 the tiddlers have the same modifier, then there will also be a feed
-level author element. 
+level author element.
 
 If 'atom.author_uri_map' is set in config then its value will be used
 as the format string for created a uri element within the author element.
