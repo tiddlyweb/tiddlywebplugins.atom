@@ -9,6 +9,7 @@ clean:
 	rm -r dist || true
 	rm -r build || true
 	rm -r *egg-info || true
+	rm -r store || true
 
 test: clean
 	py.test -x test
