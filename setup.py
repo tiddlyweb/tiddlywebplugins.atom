@@ -19,5 +19,6 @@ setup(
         install_requires = ['setuptools',
             'tiddlyweb>=1.2.10',
             'feedgenerator'],
-        zip_safe = False
+        zip_safe = False,
+        license = 'BSD',
         )

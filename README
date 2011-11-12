@@ -37,11 +37,5 @@ For example:
 would give the 20 most recently modified tiddlers which are not tagged
 'excludeLists'.
 
-The Atom code is borrowed from Django's django/utils/feedgenerator.py
-
-* http://www.djangoproject.com/documentation/syndication_feeds/
-* http://code.djangoproject.com/browser/django/trunk/django/utils/feedgenerator.py
-
-Copyright 2011, Chris Dent <cdent@peermore.com>.
-
-BSD Licensed as TiddlyWeb itself.
+The Atom code was original adapted from Django's django/utils/feedgenerator.py
+which itself was then extracted to its own package.
