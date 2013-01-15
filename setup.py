@@ -2,7 +2,7 @@
 import os
 from setuptools import setup, find_packages
 
-VERSION = '1.3.12'
+VERSION = '1.3.13'
 
 
 setup(
@@ -18,7 +18,7 @@ setup(
         platforms = 'Posix; MacOS X; Windows',
         install_requires = ['setuptools',
             'tiddlyweb>=1.2.10',
-            'feedgenerator'],
+            'feedgenerator<1.4'],
         zip_safe = False,
         license = 'BSD',
         )
