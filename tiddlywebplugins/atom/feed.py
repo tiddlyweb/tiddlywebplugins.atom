@@ -40,6 +40,8 @@ from tiddlyweb.wikitext import render_wikitext
 from tiddlyweb.web.util import server_base_url, server_host_url, tiddler_url
 
 
+LOGGER = logging.getLogger(__name__)
+
 class Serialization(SerializationInterface):
 
     def _current_url(self):
@@ -194,7 +196,7 @@ class Serialization(SerializationInterface):
             depth -= 1
 
     def _add_item(self, feed, tiddler, link, title, description):
-        logging.debug('adding %s', title)
+        LOGGER.debug('adding %s', title)
         author_link = self._get_author_link(tiddler.modifier)
         entry_base = self._get_entry_base(tiddler)
         feed.add_item(title=title,
