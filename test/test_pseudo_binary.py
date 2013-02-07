@@ -48,3 +48,24 @@ def test_normal_output():
     serializer.object = tiddler
     output = serializer.to_string()
     assert 'h1 class="w' in output
+
+
+def test_html_output():
+    tiddler = Tiddler('html thing', 'fake')
+    tiddler.text = '<h1>Hi</h1>'
+    tiddler.type = 'text/html'
+
+    serializer.object = tiddler
+    output = serializer.to_string()
+    assert 'type="html">&lt;h1&gt;Hi&lt;/h1&gt;</content>' in output
+    assert '&lt;pre&gt;' not in output
+
+def test_html_output():
+    tiddler = Tiddler('html thing', 'fake')
+    tiddler.text = '<h1>Hi</h1>'
+    tiddler.type = 'text/nothtml'
+
+    serializer.object = tiddler
+    output = serializer.to_string()
+    assert 'type="html">&lt;pre&gt;&lt;h1&gt;Hi&lt;/h1&gt;&lt;/pre&gt;</content>' in output
+    assert '&lt;pre&gt;' in output

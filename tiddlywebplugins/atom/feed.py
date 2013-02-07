@@ -35,7 +35,7 @@ from feedgenerator import Atom1Feed, rfc3339_date
 from tiddlyweb.filters import parse_for_filters, recursive_filter
 from tiddlyweb.model.tiddler import Tiddler
 from tiddlyweb.serializations import SerializationInterface
-from tiddlyweb.util import binary_tiddler, pseudo_binary
+from tiddlyweb.util import binary_tiddler, pseudo_binary, renderable
 from tiddlyweb.wikitext import render_wikitext
 from tiddlyweb.web.util import server_base_url, server_host_url, tiddler_url
 
@@ -65,6 +65,11 @@ class Serialization(SerializationInterface):
             default_filter = config['atom.default_filter']
             filters, _ = parse_for_filters(default_filter, self.environ)
             new_tiddlers = Tiddlers()
+            new_tiddlers.is_search = tiddlers.is_search
+            new_tiddlers.is_revisions = tiddlers.is_revisions
+            new_tiddlers.bag = tiddlers.bag
+            new_tiddlers.recipe = tiddlers.recipe
+            new_tiddlers.link = tiddlers.link
             for tiddler in recursive_filter(filters, tiddlers):
                 new_tiddlers.add(tiddler)
                 authors.add(tiddler.modifier)
@@ -83,11 +88,15 @@ class Serialization(SerializationInterface):
             author_link = self._get_author_link(author_name)
             author_avatar = self._get_author_avatar(author_name)
 
-        hub = self.environ.get('tiddlyweb.config', {}).get('atom.hub',
-                None)
+        hub = self.environ.get('tiddlyweb.config', {}).get('atom.hub', None)
 
-        current_url = self._current_url()
-        link = u'%s%s' % (self._host_url(), current_url)
+        if tiddlers.link:
+            link = tiddlers.link
+        else:
+            link = self._current_url()
+        if not link.startswith('http'):
+            link = u'%s%s' % (self._host_url(), link)
+
         feed = AtomFeed(link=link,
             language=u'en',
             hub=hub,
@@ -118,6 +127,7 @@ class Serialization(SerializationInterface):
 
         if not do_revisions:
             if binary_tiddler(tiddler):
+                # XXX: ought to be enclosures?
                 if tiddler.type.startswith('image/'):
                     description = ('\n<img src="%s" />\n'
                             % tiddler_url(self.environ, tiddler))
@@ -125,15 +135,15 @@ class Serialization(SerializationInterface):
                     description = ('\n<a href="%s">%s</a>\n'
                             % (tiddler_url(self.environ, tiddler),
                                 tiddler.title))
-            elif (tiddler.type and (tiddler.type not in
-                self.environ['tiddlyweb.config']['wikitext.type_render_map'])
-                    and pseudo_binary(tiddler.type)):
-                description = '<pre>' + tiddler.text + '</pre>'
-            else:
+            elif (renderable(tiddler, self.environ)):
                 try:
                     description = render_wikitext(tiddler, self.environ)
                 except KeyError:
                     description = 'Tiddler cannot be rendered.'
+            elif (tiddler.type == 'text/html'):
+                description = tiddler.text
+            else:
+                description = '<pre>' + tiddler.text + '</pre>'
 
             self._add_item(feed, tiddler, tiddler_url(self.environ, tiddler),
                     tiddler.title, description)
