@@ -2,7 +2,6 @@
 Add <link> elements for Atom feeds to tiddler collections.
 """
 
-from tiddlyweb.serializations import SerializationInterface
 from tiddlyweb.serializations.html import Serialization as HTMLSerialization
 from tiddlyweb.web.util import tiddler_url
 

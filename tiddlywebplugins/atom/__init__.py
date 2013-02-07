@@ -10,13 +10,13 @@ in tiddlywebconfig.py.
 
 EXTENSION_TYPES = {
         'atom': 'application/atom+xml'
-        }
+}
 SERIALIZERS = {
         'application/atom+xml': ['tiddlywebplugins.atom.feed',
             'application/atom+xml; charset=UTF-8'],
         'text/html': ['tiddlywebplugins.atom.htmllinks',
             'text/html; charset=UTF-8'],
-        }
+}
 
 
 def init(config):

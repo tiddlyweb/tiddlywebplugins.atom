@@ -42,6 +42,7 @@ from tiddlyweb.web.util import server_base_url, server_host_url, tiddler_url
 
 LOGGER = logging.getLogger(__name__)
 
+
 class Serialization(SerializationInterface):
 
     def _current_url(self):
@@ -124,10 +125,9 @@ class Serialization(SerializationInterface):
                     description = ('\n<a href="%s">%s</a>\n'
                             % (tiddler_url(self.environ, tiddler),
                                 tiddler.title))
-            elif (tiddler.type and (
-                tiddler.type not in
+            elif (tiddler.type and (tiddler.type not in
                 self.environ['tiddlyweb.config']['wikitext.type_render_map'])
-                and pseudo_binary(tiddler.type)):
+                    and pseudo_binary(tiddler.type)):
                 description = '<pre>' + tiddler.text + '</pre>'
             else:
                 try:
