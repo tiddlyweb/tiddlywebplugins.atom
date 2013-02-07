@@ -2,7 +2,7 @@
 import os
 from setuptools import setup, find_packages
 
-VERSION = '1.3.14'
+VERSION = '1.4.0'
 
 
 setup(
@@ -21,4 +21,4 @@ setup(
             'feedgenerator<1.4'],
         zip_safe = False,
         license = 'BSD',
-        )
+)
