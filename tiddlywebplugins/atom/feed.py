@@ -140,8 +140,6 @@ class Serialization(SerializationInterface):
                     description = render_wikitext(tiddler, self.environ)
                 except KeyError:
                     description = 'Tiddler cannot be rendered.'
-            elif (tiddler.type == 'text/html'):
-                description = tiddler.text
             else:
                 description = '<pre>' + tiddler.text + '</pre>'
 
