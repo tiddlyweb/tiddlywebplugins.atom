@@ -32,6 +32,71 @@ c-1.047-5.572,6.989-7.43,8.178-1.707l4.814,23.498c1.322,6.012,5.768,9.214,11.129
 </svg>
 """
 
+# content which caused a failure with validating feed readers
+# when supporting raw html
+HTML="""<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>edit</title>
+    <link rel="stylesheet"
+          type="text/css"
+          href="/bags/common/tiddlers/reset.css">
+    <link rel="stylesheet"
+           type="text/css"
+           href="/bags/edit_public/tiddlers/edit.css">
+</head>
+<body>
+    <div id="container">
+        <div class="cleancol" id="recents">
+            <h1>Changes</h1>
+            <ul>
+            </ul>
+        </div>
+        <div class="cleancol" id="info">
+            <ul>
+                <li><button id="saver">Save & Return</button></li>
+                <li><button id="save">Save</button></li>
+                <li><button id="revert">Revert</button></li>
+                <li><button id="delete">Delete</button></li>
+            </ul>
+            <div id="type">
+                <ul>
+                    <li><label><input name="type" type="radio"
+                        value="default">Default</label></li>
+                    <li><label><input name="type" type="radio"
+                        value="text/x-markdown">Markdown</label></li>
+                    <li><label><input name="type" type="radio"
+                        value="text/css">CSS</label></li>
+                    <li><label><input name="type" type="radio"
+                        value="text/javascript">JavaScript</label></li>
+                    <li><label><input name="type" type="radio"
+                        value="text/html">HTML</label></li>
+                    <li><label><input name="type" type="radio"
+                        value="text/plain">Plain Text</label></li>
+                    <li><label><input name="type" type="radio"
+                        value="other">Other</label></li>
+                </ul>
+            </div>
+            <div id="message"></div>
+            <div id="tags">
+            </div>
+        </div>
+        <div class="cleancol" id="editor">
+            <h1></h1>
+            <textarea class="inputs" name="text"></textarea><br/>
+            <input class="inputs" name="tags" value="">
+        </div>
+    </div>
+
+    <script src="/bags/common/tiddlers/jquery.js"></script>
+    <script src="/bags/edit_public/tiddlers/edit.js"></script>
+    <script src="/status.js"></script>
+    <script src="/bags/common/tiddlers/backstage.js"></script>
+</body>
+</html>
+"""
+
 def test_svg_output():
     tiddler = Tiddler('svg thing', 'fake')
     tiddler.text = SVG
@@ -50,6 +115,28 @@ def test_normal_output():
     assert 'h1 class="w' in output
 
 
+def test_html_doc():
+    tiddler = Tiddler('edit', 'fake')
+    tiddler.text = HTML
+    tiddler.type = 'text/html'
+    serializer.object = tiddler
+    output = serializer.to_string()
+
+    print '######'
+    print output
+    print '######'
+    # not wrapped in pre
+    assert '&lt;pre&gt;' not in output
+
+    # "disabled" by sanitizer
+    assert '&amp;lt;script' in output
+    assert '&amp;lt;meta' in output
+    assert '&amp;lt;link' in output
+    assert '&amp;lt;body' in output
+    assert '&amp;lt;html' in output
+
+
+
 def test_html_output():
     tiddler = Tiddler('html thing', 'fake')
     tiddler.text = '<h1>Hi</h1>'
@@ -60,7 +147,7 @@ def test_html_output():
     assert 'type="html">&lt;h1&gt;Hi&lt;/h1&gt;</content>' in output
     assert '&lt;pre&gt;' not in output
 
-def test_html_output():
+def test_nonhtml_output():
     tiddler = Tiddler('html thing', 'fake')
     tiddler.text = '<h1>Hi</h1>'
     tiddler.type = 'text/nothtml'
