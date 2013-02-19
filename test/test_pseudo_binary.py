@@ -122,18 +122,16 @@ def test_html_doc():
     serializer.object = tiddler
     output = serializer.to_string()
 
-    print '######'
-    print output
-    print '######'
-    # not wrapped in pre
-    assert '&lt;pre&gt;' not in output
+    # is wrapped in pre
+    assert '&lt;pre&gt;' in output
 
-    # "disabled" by sanitizer
-    assert '&amp;lt;script' in output
-    assert '&amp;lt;meta' in output
-    assert '&amp;lt;link' in output
-    assert '&amp;lt;body' in output
-    assert '&amp;lt;html' in output
+    # these were doubly escaped by sanitizer but the
+    # sanitizer is _way_ too slow so no more
+    assert '&lt;script' in output
+    assert '&lt;meta' in output
+    assert '&lt;link' in output
+    assert '&lt;body' in output
+    assert '&lt;html' in output
 
 
 
@@ -144,8 +142,8 @@ def test_html_output():
 
     serializer.object = tiddler
     output = serializer.to_string()
-    assert 'type="html">&lt;h1&gt;Hi&lt;/h1&gt;</content>' in output
-    assert '&lt;pre&gt;' not in output
+    assert 'type="html">&lt;pre&gt;&lt;h1&gt;Hi&lt;/h1&gt;&lt;/pre&gt;</content>' in output
+    assert '&lt;pre&gt;' in output
 
 def test_nonhtml_output():
     tiddler = Tiddler('html thing', 'fake')

@@ -38,7 +38,6 @@ from tiddlyweb.serializations import SerializationInterface
 from tiddlyweb.util import binary_tiddler, renderable
 from tiddlyweb.wikitext import render_wikitext
 from tiddlyweb.web.util import server_base_url, server_host_url, tiddler_url
-from tiddlyweb.web.validator import sanitize_html_fragment
 
 
 LOGGER = logging.getLogger(__name__)
@@ -141,8 +140,6 @@ class Serialization(SerializationInterface):
                     description = render_wikitext(tiddler, self.environ)
                 except KeyError:
                     description = 'Tiddler cannot be rendered.'
-            elif (tiddler.type == 'text/html'):
-                description = sanitize_html_fragment(tiddler.text)
             else:
                 description = '<pre>' + tiddler.text + '</pre>'
 
