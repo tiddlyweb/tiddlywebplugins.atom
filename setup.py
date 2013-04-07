@@ -18,7 +18,7 @@ setup(
         platforms = 'Posix; MacOS X; Windows',
         install_requires = ['setuptools',
             'tiddlyweb>=1.4.2',
-            'feedgenerator<1.4'],
+            'feedgenerator'],
         zip_safe = False,
         license = 'BSD',
 )
