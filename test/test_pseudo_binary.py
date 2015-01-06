@@ -112,7 +112,7 @@ def test_normal_output():
 
     serializer.object = tiddler
     output = serializer.to_string()
-    assert 'h1 class="w' in output
+    assert '!Hi&lt;/pre&gt' in output
 
 
 def test_html_doc():
