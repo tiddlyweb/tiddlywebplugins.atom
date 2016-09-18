@@ -2,7 +2,7 @@
 import os
 from setuptools import setup, find_packages
 
-VERSION = '1.4.4'
+VERSION = '1.4.5'
 
 
 setup(
@@ -19,6 +19,9 @@ setup(
         install_requires = ['setuptools',
             'tiddlyweb>=1.4.2',
             'feedgenerator'],
+        'extras_require': {
+            'testing': ['tiddlywebwiki', 'tiddlywebplugins.markdown']
+        },
         zip_safe = False,
         license = 'BSD',
 )

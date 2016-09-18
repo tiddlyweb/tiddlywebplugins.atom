@@ -216,7 +216,9 @@ class Serialization(SerializationInterface):
                 author_name=tiddler.modifier,
                 author_link=author_link,
                 pubdate=self._tiddler_datetime(tiddler.created),
-                updated=self._tiddler_datetime(tiddler.modified))
+                updated=self._tiddler_datetime(tiddler.modified),
+                # modern feedgenerators need updateddate
+                updateddate=self._tiddler_datetime(tiddler.modified))
 
     def _get_entry_base(self, tiddler):
         if tiddler.recipe:

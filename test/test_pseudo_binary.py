@@ -142,7 +142,9 @@ def test_html_output():
 
     serializer.object = tiddler
     output = serializer.to_string()
-    assert 'type="html">&lt;pre&gt;&lt;h1&gt;Hi&lt;/h1&gt;&lt;/pre&gt;</content>' in output
+    print output
+    assert 'type="html"' in output
+    assert '>&lt;pre&gt;&lt;h1&gt;Hi&lt;/h1&gt;&lt;/pre&gt;</content>' in output
     assert '&lt;pre&gt;' in output
 
 def test_nonhtml_output():
@@ -152,5 +154,6 @@ def test_nonhtml_output():
 
     serializer.object = tiddler
     output = serializer.to_string()
-    assert 'type="html">&lt;pre&gt;&lt;h1&gt;Hi&lt;/h1&gt;&lt;/pre&gt;</content>' in output
+    assert 'type="html"' in output
+    assert '>&lt;pre&gt;&lt;h1&gt;Hi&lt;/h1&gt;&lt;/pre&gt;</content>' in output
     assert '&lt;pre&gt;' in output
