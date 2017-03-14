@@ -10,7 +10,7 @@ setup(
         name = 'tiddlywebplugins.atom',
         version = VERSION,
         description = 'A TiddlyWeb plugin that provides an Atom feed of tiddler collections.',
-        long_description=file(os.path.join(os.path.dirname(__file__), 'README')).read(),
+        long_description=open(os.path.join(os.path.dirname(__file__), 'README')).read(),
         author = 'Chris Dent',
         url = 'http://pypi.python.org/pypi/tiddlywebplugins.atom',
         packages = find_packages(exclude=['test']),
@@ -19,7 +19,7 @@ setup(
         install_requires = ['setuptools',
             'tiddlyweb>=1.4.2',
             'feedgenerator'],
-        'extras_require': {
+        extras_require = {
             'testing': ['tiddlywebwiki', 'tiddlywebplugins.markdown']
         },
         zip_safe = False,
