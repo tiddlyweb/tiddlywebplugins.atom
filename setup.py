@@ -19,7 +19,7 @@ setup(
         install_requires = ['setuptools',
             'tiddlyweb>=1.4.2',
             'feedgenerator'],
-        'extras_require': {
+        extras_require = {
             'testing': ['tiddlywebwiki', 'tiddlywebplugins.markdown']
         },
         zip_safe = False,
